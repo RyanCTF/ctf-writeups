@@ -1,0 +1,326 @@
+EXPOSEDSUPPLY - HTB Cloud Challenge Notes
+==========================================
+
+## Overview
+
+This is a GCP cloud forensics challenge. You are given a set of audit log artifacts
+from a GCP project and asked to reconstruct a supply chain compromise incident where
+an attacker gained access to the GCP environment, uploaded a zip file containing
+a leaked service account key to a public Cloud Storage bucket, and created an
+additional service account key to establish persistence.
+
+**GCP Project**: `helical-cursor-494913-k9`
+**Admin user**: `admin@nightfall.net`
+**Region**: `asia-southeast1`
+
+---
+
+## Artifacts Structure
+
+```
+artifacts/
+  admin_activity_logs.csv          # IAM and admin API calls (~2507 rows)
+  storage_data_access_logs.csv     # GCS read/write/delete events (~2503 rows)
+  iam_exports.json                 # Current IAM state snapshot
+  artifact_registry_inventory.json # Container registry state
+  website_snapshot/
+    index.html
+    about.html
+    assets/
+      main.min.js      # Obfuscated JavaScript frontend bundle (4197 bytes)
+      style.min.css
+      vendor.bundle.js
+    data/
+    supply-bundle.zip  # The malicious zip uploaded to the public bucket
+```
+
+---
+
+## Step 1 - Identify the GCP Project ID
+
+**Method**: Check the `iam_exports.json` or any log entry.
+
+From `iam_exports.json`:
+```json
+"supply-pipeline-sa@helical-cursor-494913-k9.iam.gserviceaccount.com"
+```
+
+From `admin_activity_logs.csv` (Row 0):
+```
+protoPayload.request.name = 'projects/helical-cursor-494913-k9
+```
+
+**Answer**: `helical-cursor-494913-k9`
+
+---
+
+## Step 2 - Identify the Publicly Exposed Bucket
+
+**Method**: Look in the storage logs for the bucket that had a `storage.buckets.update`
+event that changed it to public access, and/or search `iam_exports.json` for storage
+admin roles. Also look at the website - it references the bucket directly in the JS.
+
+From `storage_data_access_logs.csv` (Row 1055):
+```
+timestamp:  2026-05-03T06:59:21.104729789Z
+method:     storage.buckets.update
+principal:  admin@nightfall.net
+ip:         88.65.198.198
+resource:   projects/_/buckets/mec-elections-logistics-pub
+```
+
+The bucket was updated (access policy changed to public) at the same moment the zip
+was uploaded. In `iam_exports.json`, `elections-deployer` has `roles/storage.admin`
+on the project, confirming this is an active bucket.
+
+**Answer**: `mec-elections-logistics-pub`
+
+---
+
+## Step 3 - Identify the Malicious Upload (Filename and Timestamp)
+
+**Method**: In `storage_data_access_logs.csv`, look for `storage.objects.create`
+events on the `mec-elections-logistics-pub` bucket from anomalous IP addresses.
+
+From `storage_data_access_logs.csv` (Row 1056, same timestamp as bucket update):
+```
+timestamp:  2026-05-03T06:59:21.104729789Z
+method:     storage.objects.create
+principal:  admin@nightfall.net
+ip:         88.65.198.198
+resource:   projects/_/buckets/mec-elections-logistics-pub/objects/supply-bundle.zip
+```
+
+These two events (bucket update + object create) at the exact same timestamp show
+that the attacker made the bucket public and uploaded the zip simultaneously.
+
+**Answer**: `supply-bundle.zip`, uploaded at `2026-05-03T06:59:21Z`
+
+---
+
+## Step 4 - Identify the Anomalous IP Address
+
+**Method**: The normal admin operations throughout the logs come from `120.196.206.75`.
+The attacker also uses `33.252.46.44` for automated SA operations. However, the
+upload event uses a third IP that doesn't appear in normal operations.
+
+Normal admin IP: `120.196.206.75` (hundreds of events 2026-05-01 through 2026-05-03)
+Attacker automation IP: `33.252.46.44` (SA impersonation chain activity)
+Anomalous upload IP: `88.65.198.198` (only 2 events: bucket update + zip upload + SA key creation)
+
+From `admin_activity_logs.csv` (Row 1111):
+```
+timestamp:  2026-05-03T06:59:30.244955188Z
+method:     google.iam.admin.v1.CreateServiceAccountKey
+principal:  admin@nightfall.net
+ip:         88.65.198.198
+resource:   projects/-/serviceAccounts/buildops-ci-runner@helical-cursor-494913-k9.iam.gserviceaccount.com
+```
+
+Nine seconds after the upload, a new service account key was created for
+`buildops-ci-runner` from the same anomalous IP. This confirms the attacker was
+operating as `admin@nightfall.net` (the project owner) from this IP and established
+persistence by creating a new SA key.
+
+**Answer**: `88.65.198.198`
+
+---
+
+## Step 5 - Inspect the Uploaded ZIP Contents
+
+**Method**: The zip is present in the `website_snapshot/` folder as it was captured
+from the public bucket. Extract and read it.
+
+```bash
+python3 -c "
+import zipfile, json
+zf = zipfile.ZipFile('artifacts/website_snapshot/supply-bundle.zip')
+for name in zf.namelist():
+    print(name)
+"
+```
+
+ZIP contents:
+```
+pipeline-export/github-actions/buildops-ci-runner-svcacct.json  (2413 bytes)
+vendor-export-manifest.json                                       (516 bytes)
+```
+
+`vendor-export-manifest.json` describes the zip as a "vendor export" from the
+nightfall supply pipeline, generated by `buildops-release-bot@mec-elections.gov.internal`.
+It labels the SA key file as `data_classification: CONFIDENTIAL` and notes it is
+a "Legacy CI runner service account key (rotation flagged overdue)".
+
+`pipeline-export/github-actions/buildops-ci-runner-svcacct.json` is a full GCP service
+account JSON key file:
+
+```json
+{
+  "type": "service_account",
+  "project_id": "helical-cursor-494913-k9",
+  "private_key_id": "a3f91c8e2d004b7f9012c0ffee4242ab0b1eca7d",
+  "private_key": "-----BEGIN RSA PRIVATE KEY----- [...]",
+  "client_email": "buildops-ci-runner@helical-cursor-494913-k9.iam.gserviceaccount.com",
+  "client_id": "114834742891578631905",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token"
+}
+```
+
+This is the key for `buildops-ci-runner` - the same SA that has been making
+automated calls throughout the audit logs from `33.252.46.44`. The key was
+committed into the supply pipeline and leaked to anyone who could access the
+public bucket.
+
+**Answer**: `buildops-ci-runner@helical-cursor-494913-k9.iam.gserviceaccount.com`
+(leaked service account), key file at `pipeline-export/github-actions/buildops-ci-runner-svcacct.json`
+
+---
+
+## Step 6 - Decode the Frontend JavaScript (Obfuscated SA Credentials)
+
+**Method**: The website at `website_snapshot/assets/main.min.js` is obfuscated
+using a standard array-rotation obfuscator. The string array `_0x2384()` contains
+a mix of plain strings and base64-encoded values. Decode all base64 strings.
+
+```python
+import base64, re
+
+with open('artifacts/website_snapshot/assets/main.min.js') as f:
+    content = f.read()
+
+strings = re.findall(r"'([A-Za-z0-9+/=]{20,})'", content)
+for s in strings:
+    try:
+        decoded = base64.b64decode(s + '==').decode('utf-8', errors='strict')
+        if all(32 <= ord(c) < 127 for c in decoded):
+            print(f'{s} => {decoded}')
+    except:
+        pass
+```
+
+Decoded base64 strings found in the JS bundle:
+```
+aGVsaWNhbC1jdXJzb3ItNDk0OTEzLWs5         => helical-cursor-494913-k9
+YXNpYS1zb3V0aGVhc3Qx                       => asia-southeast1
+bWVjLWVsZWN0aW9ucy1wcm9k                   => mec-elections-prod
+bWVjLWVsZWN0aW9ucy1sb2dpc3RpY3MtcHVi     => mec-elections-logistics-pub
+YnVpbGRvcHMtY2ktcnVubmVy...               => buildops-ci-runner@helical-cursor-494913-k9.iam.gserviceaccount.com
+c3RvcmFnZS5nb29nbGVhcGlzLmNvbQ==          => storage.googleapis.com
+NTI0MTg2MzIwMzQw (plain, not base64)        => 524186320340 (project number)
+```
+
+The frontend bundle hardcodes:
+- The GCP project ID
+- The bucket name `mec-elections-logistics-pub`
+- The full SA email of `buildops-ci-runner`
+
+This is a secondary leak path - even before the zip was uploaded, an attacker
+inspecting the website's JavaScript could discover the SA email and project structure.
+
+**Answer**: SA email `buildops-ci-runner@helical-cursor-494913-k9.iam.gserviceaccount.com`
+embedded in obfuscated JS as base64.
+
+---
+
+## Step 7 - Map the IAM Privilege Chain
+
+**Method**: Read `iam_exports.json` to understand what the leaked `buildops-ci-runner`
+key could access.
+
+Project-level bindings for `buildops-ci-runner`:
+- `roles/iam.securityReviewer` - can read IAM policies
+- `roles/logging.viewer` - can read logs
+- `roles/storage.objectAdmin` - can read/write/delete objects in any bucket
+- `roles/storage.objectViewer` - can list objects
+
+SA-level binding: `buildops-ci-runner` has `roles/iam.serviceAccountTokenCreator`
+on `supply-pipeline-sa`. This means:
+```
+buildops-ci-runner → (impersonate) → supply-pipeline-sa
+supply-pipeline-sa → (TokenCreator) → elections-deployer
+```
+
+`supply-pipeline-sa` also has `roles/resourcemanager.projectIamAdmin` at the
+project level, meaning the chain ultimately leads to full IAM control over the project.
+
+The full impersonation chain:
+```
+buildops-ci-runner (leaked key) 
+  → GenerateAccessToken for supply-pipeline-sa
+    → supply-pipeline-sa has projectIamAdmin
+      → can grant any role to any principal
+```
+
+This is confirmed by the logs: `buildops-ci-runner` repeatedly calls `GenerateAccessToken`
+for resource ID `114834742891578631905` (which maps to `supply-pipeline-sa`).
+
+---
+
+## Step 8 - Timeline Reconstruction
+
+```
+2026-05-01 (Days before incident)
+  07:03Z  admin@nightfall.net (120.196.206.75) - lists service accounts (routine)
+  07:05Z  buildops-ci-runner (33.252.46.44) - GetServiceAccount on elections-ghost-sa
+           [attacker already has the key, begins reconnaissance]
+  08:06Z  buildops-ci-runner (33.252.46.44) - GenerateIdToken for supply-pipeline-sa
+           [demonstrates the impersonation chain is working]
+  09:14Z  buildops-ci-runner (33.252.46.44) - AccessSecretVersion election-db-credentials/2
+           [reads the database credentials]
+  11:38Z  buildops-ci-runner (33.252.46.44) - GetServiceAccount on elections-deployer
+           [maps the SA chain further]
+
+2026-05-03T06:59Z (The supply chain incident)
+  06:59:21Z  admin@nightfall.net (88.65.198.198) - storage.buckets.update on mec-elections-logistics-pub
+              [bucket made publicly accessible]
+  06:59:21Z  admin@nightfall.net (88.65.198.198) - storage.objects.create: supply-bundle.zip
+              [zip uploaded containing leaked buildops-ci-runner SA key]
+  06:59:30Z  admin@nightfall.net (88.65.198.198) - CreateServiceAccountKey for buildops-ci-runner
+              [additional key created - persistence for the attacker]
+```
+
+The anomalous IP `88.65.198.198` only appears in these 3 events. The attacker
+used compromised `admin@nightfall.net` credentials from a different location than
+the legitimate admin's normal IP (`120.196.206.75`).
+
+---
+
+## Flags / Answers Summary
+
+| # | Question | Answer |
+|---|----------|--------|
+| 1 | GCP Project ID | `helical-cursor-494913-k9` |
+| 2 | Publicly exposed bucket | `mec-elections-logistics-pub` |
+| 3 | Attacker IP | `88.65.198.198` |
+| 4 | Timestamp of upload | `2026-05-03T06:59:21Z` |
+| 5 | Uploaded filename | `supply-bundle.zip` |
+| 6 | Leaked SA email (in zip) | `buildops-ci-runner@helical-cursor-494913-k9.iam.gserviceaccount.com` |
+| 7 | SA email hardcoded in JS | `buildops-ci-runner@helical-cursor-494913-k9.iam.gserviceaccount.com` |
+| 8 | Key created for persistence | `buildops-ci-runner` SA key created `2026-05-03T06:59:30Z` |
+
+---
+
+## Key Investigation Techniques
+
+1. **Cross-correlate storage logs with admin logs by timestamp**: The bucket update
+   and file upload share the exact same timestamp, confirming they were one atomic
+   attacker action.
+
+2. **IP deviation detection**: The legitimate admin operated from `120.196.206.75`
+   consistently for days. The three anomalous events from `88.65.198.198` stand out
+   immediately when you sort by IP.
+
+3. **Decode obfuscated JS**: Don't ignore the website files. Base64 strings inside
+   obfuscated arrays are a common way SA credentials leak into frontend bundles.
+   Pattern: any string matching `[A-Za-z0-9+/=]{20,}` in a JS string array that
+   decodes to printable ASCII is worth reading.
+
+4. **Follow the SA impersonation chain**: In GCP, `roles/iam.serviceAccountTokenCreator`
+   on an SA means the holder can call `GenerateAccessToken` and act as that SA.
+   Chain them and you find the blast radius of the leaked key.
+
+5. **CreateServiceAccountKey = persistence**: When an attacker creates a new key for
+   an existing SA, they now have persistent access that survives the initial vector
+   being closed (e.g., password reset). Always hunt for `CreateServiceAccountKey`
+   events from anomalous IPs.
