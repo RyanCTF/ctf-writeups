@@ -43,6 +43,7 @@ Platform/
 | [galaxydash-011](BugForge/galaxydash-011/writeup.md) | Medium | Handlebars SSTI via invoice_template → context dump → flag |
 | [ottergram-011](BugForge/ottergram-011/writeup.md) | Easy | Client-side privacy filter bypass → IDOR on post detail |
 | [shadyoaks-financial](BugForge/shadyoaks-financial/writeup.md) | Easy | Business logic (negative shares → balance inflation) |
+| [sokudo-001](BugForge/sokudo-001/writeup.md) | Medium | Broken access control on PUT /api/stats - arbitrary stats manipulation |
 | [sokudo-005](BugForge/sokudo-005/writeup.md) | Easy | GraphQL IDOR - user(id:1) returns admin password to any authenticated user |
 | [tanuki-004](BugForge/tanuki-004/writeup.md) | Easy | IDOR on /api/stats/:user_id - no ownership check |
 | [tanuki-006](BugForge/tanuki-006/writeup.md) | Easy | IDOR on PUT /api/profile/:username - no ownership check |
