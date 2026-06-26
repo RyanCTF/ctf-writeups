@@ -1,7 +1,7 @@
 # cafeclub-002 - CafeClub Premium Coffee Experience
 
 **Flag:** `bug{v3wjjmOVbCYE7R5nCdG4pmjjuvOOL8lu}`
-**Difficulty:** Medium
+**Difficulty:** Medium  
 **Lab URL:** https://lab-1781816402072-unkzex.labs-app.bugforge.io
 
 ## Vuln 1: UNION SQLi on GET /api/products/:id

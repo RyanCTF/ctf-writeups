@@ -1,7 +1,7 @@
 # ottergram-003 - BugForge Lab Walkthrough
 
 **URL:** https://lab-1782173211817-m2jwo2.labs-app.bugforge.io/
-**Difficulty:** Easy
+**Difficulty:** Easy  
 **Vulnerability:** Path Traversal / Local File Inclusion (LFI)
 **Flag:** `bug{HOXg0L3oKMzzpS1hEA34BNUlOsePwxyO}`
 

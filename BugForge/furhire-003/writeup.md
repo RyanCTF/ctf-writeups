@@ -1,7 +1,7 @@
 # furhire-003 - BugForge Lab Walkthrough
 
 **URL:** https://lab-1781041320459-e8u4kx.labs-app.bugforge.io/
-**Difficulty:** Medium
+**Difficulty:** Medium  
 **Vulnerability:** Second-Order SQL Injection (SQLite)
 **Flag:** `bug{oAEQO4cjBuoH9iY9NXzGR9IAsu5SIOrE}`
 

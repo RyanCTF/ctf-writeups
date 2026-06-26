@@ -5,7 +5,7 @@
 **Date:** 2026-06-26  
 **Severity:** Critical  
 **CWE:** CWE-340 (Generation of Predictable Numbers or Identifiers)  
-**CVSS:** 9.8 (AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H) - unauthenticated, no user interaction, full admin compromise
+**CVSS:** 9.8 (AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H) - unauthenticated, no user interaction, full admin compromise  
 
 ---
 

@@ -5,7 +5,7 @@
 **Date:** 2026-06-26  
 **Severity:** Critical  
 **CWE:** CWE-321 (Use of Hard-coded Cryptographic Key)  
-**CVSS:** 9.8 (AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H) - no auth required, secret recoverable without an account
+**CVSS:** 9.8 (AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H) - no auth required, secret recoverable without an account  
 
 ---
 

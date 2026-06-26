@@ -1,6 +1,6 @@
 # tanuki-004 - BugForge
 
-**Difficulty:** Easy
+**Difficulty:** Easy  
 **Vulnerability:** IDOR - Missing object-level authorisation on user stats endpoint
 **Flag:** `bug{n6KbPEmm6madJpD8MOfoOKfW4xjGFMNT}`
 

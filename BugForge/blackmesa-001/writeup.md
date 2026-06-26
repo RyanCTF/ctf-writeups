@@ -1,6 +1,6 @@
 # blackmesa-001 - BugForge
 
-**Difficulty:** Hard
+**Difficulty:** Hard  
 **Vulnerability:** SQL Injection (string concatenation) → credential leak → OTP bypass → flag
 **Flag:** `bug{4M3WCdfAku2R2xk0sykglhPHcyg9L01V}`
 

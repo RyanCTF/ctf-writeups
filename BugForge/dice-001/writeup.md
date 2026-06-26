@@ -1,7 +1,7 @@
 # dice-001 - BugForge Lab Walkthrough
 
 **URL:** https://lab-1782265765752-b0cklk.labs-app.bugforge.io/
-**Difficulty:** Easy
+**Difficulty:** Easy  
 **Vulnerability:** OS Command Injection (simulated shell) - `whoami` exposes flag
 **Flag:** `bug{nJcq6Run07dLXPJsdZjMgbLWrPZLsmXh}`
 
