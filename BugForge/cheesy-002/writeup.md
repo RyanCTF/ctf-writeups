@@ -1,7 +1,7 @@
 # cheesy-002 - BugForge Lab Walkthrough
 
 **URL:** https://lab-1781290801717-lkd98s.labs-app.bugforge.io/
-**Difficulty:** Easy
+**Difficulty:** Easy  
 **Vulnerability:** SQL Injection - Auth Bypass (Login)
 **Flag:** `bug{kxw2f8xYWhnSvVnKUgPyyys352obaSsG}`
 

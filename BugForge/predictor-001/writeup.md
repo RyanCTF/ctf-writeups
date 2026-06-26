@@ -5,7 +5,7 @@
 **Date:** 2026-06-26  
 **Severity:** High  
 **CWE:** CWE-94 (Improper Control of Generation of Code)  
-**CVSS:** 8.6 (AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:N/A:N) - no auth required, server-side code execution
+**CVSS:** 8.6 (AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:N/A:N) - no auth required, server-side code execution  
 
 ---
 

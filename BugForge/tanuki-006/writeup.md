@@ -1,7 +1,7 @@
 # tanuki-006 - BugForge Lab Walkthrough
 
 **URL:** https://lab-1781990042093-i83zwe.labs-app.bugforge.io/
-**Difficulty:** Easy
+**Difficulty:** Easy  
 **Vulnerability:** IDOR - Missing Authorization on Profile Update (CWE-639)
 **Flag:** `bug{gIRFDTRLpBYliDleA7QKHssiFMnrvYPJ}`
 

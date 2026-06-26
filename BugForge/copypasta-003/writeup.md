@@ -1,7 +1,7 @@
 # copypasta-003 - BugForge Lab Walkthrough
 
 **URL:** https://lab-1781213709825-5lf2p3.labs-app.bugforge.io/
-**Difficulty:** Easy
+**Difficulty:** Easy  
 **Vulnerability:** Broken Access Control - Missing Ownership Check on DELETE /api/snippets/:id
 **Flag:** `bug{t2Kz3DrSlVniU5npVyh8o3k29BMisHGt}`
 

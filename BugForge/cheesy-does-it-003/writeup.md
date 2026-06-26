@@ -1,7 +1,7 @@
 # Cheesy Does It - BugForge Lab Walkthrough
 
 **URL:** https://lab-1781045343779-onrc5e.labs-app.bugforge.io/
-**Difficulty:** Easy
+**Difficulty:** Easy  
 **Vulnerability:** Business Logic - Client-Side Price + Refund Amount Manipulation
 **Flag:** `bug{IyvDy0EiIAYHKHiLys52iIlxXuE9aswB}`
 

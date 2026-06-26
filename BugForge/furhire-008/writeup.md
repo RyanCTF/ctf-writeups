@@ -1,7 +1,7 @@
 # FurHire-008 - BugForge Lab Walkthrough
 
 **URL:** https://lab-1781046588394-zw3s4u.labs-app.bugforge.io/
-**Difficulty:** Medium
+**Difficulty:** Medium  
 **Vulnerability:** SSRF - Server-Side Request Forgery via logo_url field
 **Flag:** `bug{XMNgy9hE7MO1iYIOIDA0QFgm8UB2t78B}`
 

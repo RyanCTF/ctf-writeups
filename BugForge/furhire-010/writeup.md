@@ -1,7 +1,7 @@
 # furhire-010 - BugForge Lab Walkthrough
 
 **URL:** https://lab-1781051619296-f75dps.labs-app.bugforge.io/
-**Difficulty:** Hard
+**Difficulty:** Hard  
 **Vulnerability:** CSPT (Client-Side Path Traversal) → Email Hijack → Password Reset → 2FA Prototype Pollution Bypass → ATO
 **Flag:** `bug{8vd6I1ayxaXSF8L7Q1W0K3CTTPv0rml0}`
 

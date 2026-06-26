@@ -1,7 +1,7 @@
 # Cheesy Does It (Discount) - BugForge Lab Walkthrough
 
 **URL:** https://lab-1781902801780-77y3xq.labs-app.bugforge.io/
-**Difficulty:** Easy
+**Difficulty:** Easy  
 **Vulnerability:** Business Logic - Parameter Type Confusion (Array Injection on Discount Field)
 **Flag:** `bug{3o2w8Gx16mxuqkVPA60zxv31OlR18i2S}`
 

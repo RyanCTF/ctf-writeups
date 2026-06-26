@@ -5,7 +5,7 @@
 **Date:** 2026-06-26  
 **Severity:** High  
 **CWE:** CWE-285 (Improper Authorization)  
-**CVSS:** 8.1 (AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:N) - low-privilege account required, no interaction needed
+**CVSS:** 8.1 (AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:N) - low-privilege account required, no interaction needed  
 
 ---
 

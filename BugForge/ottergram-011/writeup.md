@@ -1,7 +1,7 @@
 # ottergram-011 - BugForge Lab Walkthrough
 
 **URL:** https://lab-1781118004102-ft0wk9.labs-app.bugforge.io/
-**Difficulty:** Easy
+**Difficulty:** Easy  
 **Vulnerability:** Client-Side Filtering Bypass (Server-Side Information Disclosure)
 **Flag:** `bug{q1g2BkBaFBZfWD9ZYSa61JPoEDxQCSN5}`
 

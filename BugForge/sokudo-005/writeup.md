@@ -5,7 +5,7 @@
 **Date:** 2026-06-16  
 **Severity:** Critical  
 **CWE:** CWE-639 (Authorization Bypass Through User-Controlled Key)  
-**CVSS:** 8.1 (AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N) - auth required (low priv), no interaction needed
+**CVSS:** 8.1 (AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N) - auth required (low priv), no interaction needed  
 
 ---
 

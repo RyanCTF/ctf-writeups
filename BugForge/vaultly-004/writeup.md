@@ -1,7 +1,7 @@
 # vaultly-004 - BugForge Lab Walkthrough
 
 **URL:** https://lab-*.labs-app.bugforge.io/ (ephemeral)
-**Difficulty:** Medium
+**Difficulty:** Medium  
 **Vulnerability:** Prototype Pollution → Published Data Room Projection Bypass → Credential/Flag Disclosure
 **Flag:** `bug{0lv9enPpDYQyPo10s7dwbEQD7Iz5rFQN}`
 

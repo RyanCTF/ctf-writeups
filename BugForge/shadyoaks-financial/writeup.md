@@ -1,7 +1,7 @@
 # Shady Oaks Financial - BugForge Lab Walkthrough
 
 **URL:** https://lab-1772876144279-tvxgio.labs-app.bugforge.io/
-**Difficulty:** Easy
+**Difficulty:** Easy  
 **Vulnerability:** JWT None Algorithm Bypass (Broken Authentication)
 **Flag:** `bug{4GlcjDKi4EI8IzHljJZOAZQlxR4ZpmW3}`
 
