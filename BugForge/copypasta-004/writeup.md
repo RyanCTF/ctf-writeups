@@ -2,14 +2,14 @@
 
 **URL:** https://lab-1782929419230-x3nslm.labs-app.bugforge.io/  
 **Difficulty:** Easy  
-**Vulnerability:** IDOR — Password Reset Body Injection → Account Takeover  
+**Vulnerability:** IDOR - Password Reset Body Injection → Account Takeover  
 **Flag:** `bug{ynERtSzO7HKwxnbmu49g9bfBWl7cpWck}`
 
 ---
 
 ## Summary
 
-CopyPasta is a code-snippet sharing SaaS. The `PUT /api/profile/password` endpoint accepts a `user_id` field in the JSON body and uses it to determine whose password to update — instead of deriving the user from the authenticated JWT. Any logged-in user can overwrite any account's password by supplying a different `user_id`, then log in as that account. Targeting `user_id: 1` (admin) grants access to a private snippet containing the flag.
+CopyPasta is a code-snippet sharing SaaS. The `PUT /api/profile/password` endpoint accepts a `user_id` field in the JSON body and uses it to determine whose password to update - instead of deriving the user from the authenticated JWT. Any logged-in user can overwrite any account's password by supplying a different `user_id`, then log in as that account. Targeting `user_id: 1` (admin) grants access to a private snippet containing the flag.
 
 ## Tech Stack
 
@@ -132,7 +132,7 @@ Response includes a private snippet (`is_public: 0`) not visible to other users:
 
 ## Discovery Notes
 
-- JS bundle analysis revealed `PUT /api/profile/password` sends `{password, user_id}` — `user_id` in the body on a write endpoint is an immediate IDOR signal
+- JS bundle analysis revealed `PUT /api/profile/password` sends `{password, user_id}` - `user_id` in the body on a write endpoint is an immediate IDOR signal
 - `/api/snippets/public` leaked all author usernames and `user_id` values without auth bypass, identifying admin as `user_id: 1`
 
 ## Dead Ends
@@ -141,7 +141,7 @@ Response includes a private snippet (`is_public: 0`) not visible to other users:
 |---------|--------------|--------|
 | SQLi on login | Parameterized queries | Expected on modern Express apps |
 | Mass assignment `role:admin` on register | Field ignored | Server-side role assignment |
-| IDOR on `/api/snippets/:id` (admin's private snippet directly) | "Snippet not found" | Private snippets filtered by ownership on read — need to own the account |
+| IDOR on `/api/snippets/:id` (admin's private snippet directly) | "Snippet not found" | Private snippets filtered by ownership on read - need to own the account |
 
 ## Root Cause
 
