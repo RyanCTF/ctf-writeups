@@ -1,4 +1,4 @@
-# vaulty-006 - BugForge Lab Walkthrough
+# vaultly-006 - BugForge Lab Walkthrough
 
 **URL:** https://lab-1783810802650-d6oo2b.labs-app.bugforge.io/
 **Difficulty:** Medium
