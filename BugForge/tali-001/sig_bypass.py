@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
-"""Haiku hint: 'no signature shown / the official board still plays / the seal is your own'.
-Forge a WON official payload; submit via resumeGame with the signature segment omitted or
-emptied, to test for a verification short-circuit (if(sig && !verify) ...)."""
+"""Tali save-code signature bypass.
+
+The save code is a header-less JWT-like token `base64url(payload).base64url(hmac)`. Every
+payload-tampering attempt that keeps a signature segment present is correctly rejected, so the
+one remaining class to try is removing the signature segment entirely. This forges a WON,
+official payload and submits it via resumeGame across a matrix of signature-omission variants to
+test for a verification short-circuit (if(sig && !verify) ...). Only the dot-less, sig-less
+variant is accepted, proving verification is skipped when no signature is supplied."""
 import json, base64, urllib.request, urllib.error, copy
 BASE = "https://lab-1789247580198-x72v50.labs-app.bugforge.io"
 

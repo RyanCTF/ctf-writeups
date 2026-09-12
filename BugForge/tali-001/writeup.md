@@ -4,7 +4,6 @@
 **Difficulty:** Medium (Weekly)
 **Vulnerability:** Broken token verification - signature check short-circuits when the signature segment is omitted
 **Flag:** `bug{l6CO9JilPdEclDKgemIDVWQ0fM2YlahW}`
-**Hint:** "More tokens please."
 
 ---
 
@@ -112,15 +111,10 @@ The `sig && ...` guard short-circuits to false, verification is skipped, and the
 is trusted. This is a cousin of the JWT `alg:none` bug, but the trigger is the *absence of the
 dot*, not a header claim.
 
-The crucial nuance that hid this from every prior attempt: a token that still contains a `.`
-re-enters the verify branch and is rejected. `payload.` (empty sig, dot present) is **rejected**;
-bare `payload` (no dot) is **accepted**. A one-character difference is the whole vulnerability.
-
-This is exactly the Discord hint haiku:
-
-> no signature shown   -> omit the signature segment entirely
-> the official board still plays  -> resumeGame accepts the forged official board anyway
-> the seal is your own  -> you set `official:true` + the win yourself; the certificate ("seal") mints
+The crucial nuance: a token that still contains a `.` re-enters the verify branch and is
+rejected. `payload.` (empty sig, dot present) is **rejected**; bare `payload` (no dot) is
+**accepted**. A one-character difference is the whole vulnerability, which is why the obvious
+empty/zero/null-signature variations all fail while dropping the segment outright succeeds.
 
 ---
 
