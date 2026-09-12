@@ -1,4 +1,4 @@
-# galaxydash-006 — BugForge Lab Walkthrough
+# galaxydash-006 - BugForge Lab Walkthrough
 
 **Difficulty:** Medium (50 pts)
 **Tags:** Broken Access Control
@@ -20,8 +20,8 @@ Galaxy Dash is a B2B intergalactic delivery platform (React SPA + Express + SQLi
 | Endpoint | Method | Scoping |
 |---|---|---|
 | `/api/register` | POST | public; creates a new org (org names not unique) |
-| `/api/login` | POST | returns `{token,user,flag?}` — `flag` present for the seeded target account |
-| `/api/team` | POST | **VULNERABLE** — upsert by username, no cross-org check |
+| `/api/login` | POST | returns `{token,user,flag?}` - `flag` present for the seeded target account |
+| `/api/team` | POST | **VULNERABLE** - upsert by username, no cross-org check |
 | `/api/team/:id` | PUT/DELETE | org-scoped (only own org's users) |
 | `/api/bookings/:id`, `/api/organization`, `/api/invoices` | GET | org-scoped by JWT |
 
@@ -58,7 +58,7 @@ curl -s -X POST "$T/api/login" -H 'Content-Type: application/json' -d '{"usernam
 - All obvious data endpoints (bookings, invoices, organization, team) are correctly org-scoped; the only bug is the team-add upsert.
 - The tell for the upsert: `POST /api/team` with an existing username returns that user's REAL id (walt = id 2, `created_at` = seed time) instead of "username already exists", and the user then appears in the attacker's `GET /api/team`.
 - Fields behaviour: `email` and `password` are required and overwrite the target's values; `full_name` is preserved when omitted (proving it is an update, not a create).
-- The flag lives in the `/api/login` response body (a `flag` field) for the seeded target account — not in any stored profile field. (Cost me time: I logged in as walt but initially truncated the response and missed the `flag` key after the `user` object.)
+- The flag lives in the `/api/login` response body (a `flag` field) for the seeded target account - not in any stored profile field. (Cost me time: I logged in as walt but initially truncated the response and missed the `flag` key after the `user` object.)
 
 ## Secondary Bug (not the flag path here)
 `GET /api/invoices/:bookingId` has two code paths: first request generates+ownership-checks the invoice; subsequent CACHED reads return the stored row with NO ownership check, so any org can read another org's already-generated invoice (the sibling `GET /api/bookings/:id` is correctly scoped). Same family bug as galaxydash-003. Not usable for the flag here because no invoices are seeded (walt has no bookings).
